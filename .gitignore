@@ -1,0 +1,6 @@
+venv/
+db.sqlite3
+posts/__pycache__/
+posts/migrations/__pycache__/
+simpleblog/__pycache__
+
