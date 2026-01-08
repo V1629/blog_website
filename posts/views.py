@@ -4,28 +4,29 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from .models import Post
 from .serializers import PostSerializer
+from django.shortcuts import  get_object_or_404
 
 
 ###a MOCK POSTS DATABSE
-posts = [
-    {
-        "id" : 1,
-        "title" : "Why it is difficult to learn programming",
-        "content" : "THis is to give reason why it is hard"
-    },
-    {
-        "id" : 2,
-        "title" : "Learn Javascript",
-        "content" : "This is a course on JS"
-    },
-    {
-        "id" : 3,
-        "title":"Why it is difficult to learn programming?",
-        "content" : "this is to give reason why it is hard"
-    }
-]
+# posts = [
+#     {
+#         "id" : 1,
+#         "title" : "Why it is difficult to learn programming",
+#         "content" : "THis is to give reason why it is hard"
+#     },
+#     {
+#         "id" : 2,
+#         "title" : "Learn Javascript",
+#         "content" : "This is a course on JS"
+#     },
+#     {
+#         "id" : 3,
+#         "title":"Why it is difficult to learn programming?",
+#         "content" : "this is to give reason why it is hard"
+#     }
+# ]
 
-
+###Homepage
 @api_view(http_method_names =["GET","POST"])
 def homepage(request :Request):
 
@@ -36,14 +37,49 @@ def homepage(request :Request):
     repsonse = {"message":"Hello world"}
     return Response(data=repsonse,status = status.HTTP_200_OK)
 
-@api_view(http_method_names=["GET"])
+
+###CAN VIEW ALL THE POST AND ALSO CAN CREATE NEW POST
+@api_view(http_method_names=["GET","POST"])
 def list_posts(request : Request):
-    return Response(data=posts,status=status.HTTP_200_OK)
+    posts = Post.objects.all()
 
+    if request.method == "POST":
+        data = request.data
+        serializer = PostSerializer(data = data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            response = {
+                "message" : "Post created",
+                "data" : serializer.data
+            }
+            return Response(data=response,status=status.HTTP_201_CREATED)
+        
+        return Response(data = serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+
+    serializer = PostSerializer(instance = posts, many=True)
+    response = {
+        "message":"posts",
+        "data" : serializer.data
+    }
+
+    return Response(data=response,status=status.HTTP_200_OK)
+
+
+##View for returning the post by its id through serializer
 @api_view(http_method_names=["GET"])
-def post_detail(request:Request,post_index:int):
-    post = posts[post_index]
+def post_detail(request:Request,post_id:int):
+    post = get_object_or_404(Post,pk = post_id)
 
-    if post:
-        return Response(data=post,status=status.HTTP_200_OK)
-    return Response(data={"error":"Posts not found"},status=status.HTTP_204_NO_CONTENT)
+    serializer = PostSerializer(instance = post)
+
+    response = {
+        "message" : "post",
+        "data" : serializer.data
+    }
+
+    
+    return Response(data=response,status=status.HTTP_200_OK)
+    
