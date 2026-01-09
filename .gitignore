@@ -4,3 +4,6 @@ posts/__pycache__/
 posts/migrations/__pycache__/
 simpleblog/__pycache__
 
+accounts/__pycache__
+accounts/migrations/__pycache__/
+/home/vaibhav-mishra/projects/django/drf/django-rest-course/accounts/migrations/__pycache__
