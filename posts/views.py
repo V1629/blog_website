@@ -1,7 +1,7 @@
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,APIView
 from .models import Post
 from .serializers import PostSerializer
 from django.shortcuts import  get_object_or_404
@@ -38,34 +38,57 @@ def homepage(request :Request):
     return Response(data=repsonse,status = status.HTTP_200_OK)
 
 
-###CAN VIEW ALL THE POST AND ALSO CAN CREATE NEW POST
-@api_view(http_method_names=["GET","POST"])
-def list_posts(request : Request):
-    posts = Post.objects.all()
+###A class based view for creating and listing the posts
+class PostListCreateView(APIView):
+    serializer_class = PostSerializer
 
-    if request.method == "POST":
-        data = request.data
-        serializer = PostSerializer(data = data)
+    def get(self,request:Request,*args,**kwargs):
+        posts = Post.objects.all()
+
+        serializer = PostSerializer(instance=posts,many=True)
+        return Response(data=serializer.data,status=status.HTTP_200_OK)
+    def post(self,request:Request,*args,**kwargs):
+        data= request.data
+
+
+        serializer = self.serializer_class(data=data)
+
 
         if serializer.is_valid():
             serializer.save()
-
             response = {
-                "message" : "Post created",
+                "message" : "Post created successfully",
                 "data" : serializer.data
             }
+
             return Response(data=response,status=status.HTTP_201_CREATED)
+# @api_view(http_method_names=["GET","POST"])
+# def list_posts(request : Request):
+#     posts = Post.objects.all()
+
+#     if request.method == "POST":
+#         data = request.data
+#         serializer = PostSerializer(data = data)
+
+#         if serializer.is_valid():
+#             serializer.save()
+
+#             response = {
+#                 "message" : "Post created",
+#                 "data" : serializer.data
+#             }
+#             return Response(data=response,status=status.HTTP_201_CREATED)
         
-        return Response(data = serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+#         return Response(data = serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         
 
-    serializer = PostSerializer(instance = posts, many=True)
-    response = {
-        "message":"posts",
-        "data" : serializer.data
-    }
+    # serializer = PostSerializer(instance = posts, many=True)
+    # response = {
+    #     "message":"posts",
+    #     "data" : serializer.data
+    # }
 
-    return Response(data=response,status=status.HTTP_200_OK)
+    # return Response(data=response,status=status.HTTP_200_OK)
 
 
 ##View for returning the post by its id through serializer
