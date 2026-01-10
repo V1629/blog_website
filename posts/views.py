@@ -6,6 +6,7 @@ from rest_framework import mixins
 from .models import Post
 from .serializers import PostSerializer
 from django.shortcuts import  get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 
 ###a MOCK POSTS DATABSE
@@ -43,6 +44,7 @@ def homepage(request :Request):
 class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
 
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
 
     def get(self,request:Request,*args,**kwargs):
@@ -77,6 +79,7 @@ class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.Cr
 
 class PostRetrieveUpdateDeleteView(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
 
     def get(self,request:Request,*args,**kwargs):
