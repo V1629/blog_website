@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
+from .tokens import create_jwt_pair_for_user
 
 # Create your views here.
 
@@ -42,9 +43,11 @@ class LoginView(APIView):
         user = authenticate(email=email,password=password)
 
         if user is not None:
+
+            tokens = create_jwt_pair_for_user(user)
             response = {
                 "message" : "Login successfull",
-                "token" : user.auth_token.key
+                "tokens" : tokens
             }
             return Response(data=response,status=status.HTTP_201_CREATED)
         else:
