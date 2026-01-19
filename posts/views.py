@@ -1,12 +1,13 @@
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status,generics
-from rest_framework.decorators import api_view,APIView
+from rest_framework.decorators import api_view,APIView, permission_classes
 from rest_framework import mixins
 from .models import Post
 from .serializers import PostSerializer
 from django.shortcuts import  get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly, IsAdminUser
+from .permissions import ReadOnly,AuthorOrReadOnly
 
 
 ###a MOCK POSTS DATABSE
@@ -30,6 +31,7 @@ from rest_framework.permissions import IsAuthenticated
 
 ###Homepage
 @api_view(http_method_names =["GET","POST"])
+@permission_classes([AllowAny])
 def homepage(request :Request):
 
     if request.method == "POST":
@@ -44,8 +46,13 @@ def homepage(request :Request):
 class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
 
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Post.objects.all()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(author=user)
+        return super().perform_create(serializer)
 
     def get(self,request:Request,*args,**kwargs):
         return self.list(request,*args,**kwargs)
@@ -79,8 +86,9 @@ class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.Cr
 
 class PostRetrieveUpdateDeleteView(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
+    permission_classes = [AuthorOrReadOnly]
+    
 
     def get(self,request:Request,*args,**kwargs):
         return self.retrieve(request,*args,**kwargs)
