@@ -121,9 +121,14 @@ class ListPostsForAuthor(
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        username = self.kwargs.get("username")
+        username = self.request.query_params.get("username") or None
 
-        return Post.objects.filter(author__username = username)
+        queryset = Post.objects.all()
+
+        if username is not None:
+            return Post.objects.filter(author__username = username)
+        
+        return queryset
 
 
     def get(self,request,*args,**kwargs):

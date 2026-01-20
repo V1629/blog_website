@@ -6,7 +6,7 @@ urlpatterns = [
   path("",views.PostListCreateView.as_view(),name="list_posts"),
   path("<int:pk>/",views.PostRetrieveUpdateDeleteView.as_view(),name="post_detail"),
   # path("current_user/",views.get_posts_for_current_user,name = 'get_posts_for_current_user'),
-  path("posts_for/<username>",
+  path("posts_for/",
        views.ListPostsForAuthor.as_view(),
        name = "posts_for_current_user")
 
