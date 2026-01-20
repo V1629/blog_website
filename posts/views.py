@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view,APIView, permission_classes
 from rest_framework import mixins
 from .models import Post
 from .serializers import PostSerializer
+from accounts.serializers import CurrentUserPostsSerializer
 from django.shortcuts import  get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly, IsAdminUser
 from .permissions import ReadOnly,AuthorOrReadOnly
@@ -98,6 +99,35 @@ class PostRetrieveUpdateDeleteView(generics.GenericAPIView,mixins.RetrieveModelM
     
     def delete(self,request:Request,*args,**kwargs):
         return self.destroy(request, *args, **kwargs)
+    
+
+
+@api_view(http_method_names=["GET"])
+@permission_classes([IsAuthenticated])
+def get_posts_for_current_user(request:Request):
+    user = request.user
+
+    serializer = CurrentUserPostsSerializer(instance=user, context={"request":request})
+
+    return Response(data=serializer.data,status=status.HTTP_200_OK)
+
+
+class ListPostsForAuthor(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        username = self.kwargs.get("username")
+
+        return Post.objects.filter(author__username = username)
+
+
+    def get(self,request,*args,**kwargs):
+        return self.list(request,*args,**kwargs)
 
     
 # @api_view(http_method_names=["GET","POST"])
