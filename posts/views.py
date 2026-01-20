@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework.decorators import api_view,APIView, permission_classes
 from rest_framework import mixins
+from rest_framework.pagination import PageNumberPagination
 from .models import Post
 from .serializers import PostSerializer
 from accounts.serializers import CurrentUserPostsSerializer
@@ -10,6 +11,11 @@ from django.shortcuts import  get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly, IsAdminUser
 from .permissions import ReadOnly,AuthorOrReadOnly
 
+
+class CustomPaginator(PageNumberPagination):
+    page_size = 3
+    page_query_param = "page"
+    page_size_query_param = "page_size"
 
 ###a MOCK POSTS DATABSE
 # posts = [
@@ -48,6 +54,7 @@ class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.Cr
 
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPaginator
     queryset = Post.objects.all()
 
     def perform_create(self, serializer):
@@ -58,6 +65,7 @@ class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.Cr
     def get(self,request:Request,*args,**kwargs):
         return self.list(request,*args,**kwargs)
     
+
     def post(self,request:Request,*args,**kwargs):
         return self.create(request,*args,**kwargs)
 
