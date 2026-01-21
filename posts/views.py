@@ -150,6 +150,11 @@ class ListPostsForAuthor(
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
 
+
+    @swagger_auto_schema(
+            operation_summary = "Get post for current user",
+            operation_description="It returns a list all posts for the current logged in user"
+    )
     def get_queryset(self):
         username = self.request.query_params.get("username") or None
 
@@ -160,7 +165,11 @@ class ListPostsForAuthor(
         
         return queryset
 
-
+    
+    @swagger_auto_schema(
+            operation_summary = "Get post for current user",
+            operation_description="It returns a list all posts for the current logged in user"
+    )
     def get(self,request,*args,**kwargs):
         return self.list(request,*args,**kwargs)
 
