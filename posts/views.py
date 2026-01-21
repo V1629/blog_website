@@ -10,6 +10,7 @@ from accounts.serializers import CurrentUserPostsSerializer
 from django.shortcuts import  get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly, IsAdminUser
 from .permissions import ReadOnly,AuthorOrReadOnly
+from drf_yasg.utils import swagger_auto_schema
 
 
 class CustomPaginator(PageNumberPagination):
@@ -61,11 +62,19 @@ class PostListCreateView(generics.GenericAPIView,mixins.ListModelMixin,mixins.Cr
         user = self.request.user
         serializer.save(author=user)
         return super().perform_create(serializer)
-
+    
+    
+    @swagger_auto_schema(
+            operation_summary = "List all posts",
+            operation_description="It returns a list of all posts"
+    )
     def get(self,request:Request,*args,**kwargs):
         return self.list(request,*args,**kwargs)
     
-
+    @swagger_auto_schema(
+            operation_summary = " this endpoints Creates a posts",
+            operation_description="It creates a  post"
+    )
     def post(self,request:Request,*args,**kwargs):
         return self.create(request,*args,**kwargs)
 
@@ -98,13 +107,26 @@ class PostRetrieveUpdateDeleteView(generics.GenericAPIView,mixins.RetrieveModelM
     queryset = Post.objects.all()
     permission_classes = [AuthorOrReadOnly]
     
-
+    @swagger_auto_schema(
+                operation_summary = "Retrieve posts posts",
+                operation_description="It retrieves a list of a post by post id"
+        )
     def get(self,request:Request,*args,**kwargs):
         return self.retrieve(request,*args,**kwargs)
     
+
+    @swagger_auto_schema(
+            operation_summary = "It updates a post ",
+            operation_description="It updates a post by post id"
+    )
     def put(self,request:Request,*args,**kwargs):
         return self.update(request,*args,**kwargs)
     
+
+    @swagger_auto_schema(
+            operation_summary = "Delete posts",
+            operation_description="It deletes a  post by post id"
+    )
     def delete(self,request:Request,*args,**kwargs):
         return self.destroy(request, *args, **kwargs)
     
